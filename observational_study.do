@@ -6,9 +6,18 @@ clear
 cd "~/GitHub/remind_experiment/"
 use "data/master.dta"
 
-destring UT total rank xile, replace
+destring UT total rank xile_final, replace
 encode leader, gen(sl_code)
 
-gen remind = (sl_code == 20) & (semester == 2)
+gen remind = (sl_code == 25) & (semester == 2)
 
-reg UT total xile i.sl_code i.semester
+* What is the associated between the reminders and taking the UT?
+reg UT remind
+reg UT remind i.semester
+areg UT remind i.semester, absorb(id) cluster(id)
+areg UT remind i.semester, absorb(sl_code)
+areg UT remind i.sl_code i.semester, absorb(id) cluster(id)
+areg UT remind xile_final i.sl_code i.semester, absorb(id) cluster(id)
+
+* most of the results show a robust increase in UT, despite lots of controls
+* its hard to do power analysis because its hard to estimate all the variances
