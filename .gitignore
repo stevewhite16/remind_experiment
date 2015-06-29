@@ -4,5 +4,4 @@
 *.xlsx
 /data
 /results
-*.Rhistory
-*.RData
+*.R*
