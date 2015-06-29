@@ -17,6 +17,6 @@ Power analysis is not yet finished.
 |---|---|
 | w/ remind | 3.641 | 
 | w/o | 2.955 |
-| $\delta$ | +0.686 |
+| Δ | +0.686 |
 
 This gap persists under most regression specifications with controls added, ranging from 0.2-0.8 with a central estimate around 0.4 more UT passed.
