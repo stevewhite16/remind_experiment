@@ -1,0 +1,8 @@
+*.dta
+*.csv
+*.xls
+*.xlsx
+/data
+/results
+*.Rhistory
+*.RData
