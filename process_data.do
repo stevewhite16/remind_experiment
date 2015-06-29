@@ -16,6 +16,10 @@ foreach group of local groups {
 		clear
         insheet using `group'`i'.csv
 		tostring *, replace force
+		foreach var of varlist * {
+			replace `var' = trim(`var')
+			replace `var' = "" if `var'=="NA"
+		}
     	gen semester = `i'
     	drop v1
     	drop na*
