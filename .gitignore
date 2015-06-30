@@ -4,4 +4,6 @@
 *.xlsx
 /data
 /results
-*.R*
+*.Rd*
+*.Rh*
+*.rRa*
