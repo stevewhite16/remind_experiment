@@ -2,8 +2,6 @@
 *.csv
 *.xls
 *.xlsx
-/data
-/results
 *.Rd*
 *.Rh*
 *.Ra*
