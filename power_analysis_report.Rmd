@@ -1,0 +1,23 @@
+---
+title: "Power Analysis for remind"
+author: "Steven White"
+date: "July 1, 2015"
+output: html_document
+---
+
+This document provides brief results of an observational study on the effect of text message reminders on unit test participation and power analysis based on the estimated effect size.
+
+The estimated effect size from the observational study ranged from 0.2-0.8 with a central estimate around 0.4 more unit tests passed. The preferred specification, which controlled for unit tests completed in the fall but not individual or section fixed effects, had a point estimate of 0.52.?
+
+```{r, echo=FALSE}
+library(pwr)
+obs_effect <- 0.52
+sd <- 1.8
+d_obs <- obs_effect/sd
+n_t <- 350
+n_c <- 350
+detectable <- pwr.t2n.test(n1=n_t, n2=n_c, sig.level=0.05, power=0.8)
+power <- pwr.t2n.test(n1=n_t, n2=n_c, sig.level=0.05, d=d_obs)
+```
+
+Power analysis indicates that with a sample of `r n_t+n_c` students we have `r power$power` power to detect an effect of *`r obs_effect[1]`* unit tests and can detect an effect of as few as *`r detectable$d*sd`* unit tests with 80% power.
