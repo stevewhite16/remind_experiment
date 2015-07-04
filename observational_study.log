@@ -1,0 +1,393 @@
+
+  ___  ____  ____  ____  ____ (R)
+ /__    /   ____/   /   ____/
+___/   /   /___/   /   /___/   14.0   Copyright 1985-2015 StataCorp LP
+  Statistics/Data Analysis            StataCorp
+                                      4905 Lakeway Drive
+     MP - Parallel Edition            College Station, Texas 77845 USA
+                                      800-STATA-PC        http://www.stata.com
+                                      979-696-4600        stata@stata.com
+                                      979-696-4601 (fax)
+
+Unlimited-user 4-core Stata network license expires 30 Jun 2016:
+       Serial number:  501409004087
+         Licensed to:  Harvard University
+                       Harvard University
+
+Notes:
+      1.  Stata is running in batch mode.
+      2.  Unicode is supported; see help unicode_advice.
+      3.  More than 2 billion observations are allowed; see help obs_advice.
+      4.  Maximum number of variables is set to 5000; see help set_maxvar.
+
+. do "observational_study.do" 
+
+. * observational_study.do
+. * Conducts observational study of factors associated with doing UTs
+. 
+. set more off
+
+. clear
+
+. cd "~/GitHub/remind_experiment/"
+/Users/stevewhite/GitHub/remind_experiment
+
+. use "data/master.dta"
+
+. 
+. destring UT total rank xile_final, replace
+UT has all characters numeric; replaced as byte
+(3 missing values generated)
+total has all characters numeric; replaced as double
+(3 missing values generated)
+rank has all characters numeric; replaced as int
+(3 missing values generated)
+xile_final has all characters numeric; replaced as double
+(10 missing values generated)
+
+. encode leader, gen(sl_code)
+
+. 
+. gen remind = (sl_code == 25) & (semester == 2)
+
+. 
+. * What is the associated between the reminders and taking the UT?
+. reg UT remind
+
+      Source |       SS           df       MS      Number of obs   =     1,094
+-------------+----------------------------------   F(1, 1092)      =      5.24
+       Model |  17.6770667         1  17.6770667   Prob > F        =    0.0222
+    Residual |  3681.88052     1,092  3.37168546   R-squared       =    0.0048
+-------------+----------------------------------   Adj R-squared   =    0.0039
+       Total |  3699.55759     1,093  3.38477364   Root MSE        =    1.8362
+
+------------------------------------------------------------------------------
+          UT |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      remind |   .6855754   .2994151     2.29   0.022     .0980815    1.273069
+       _cons |    2.95545   .0565324    52.28   0.000     2.844526    3.066375
+------------------------------------------------------------------------------
+
+. reg UT remind i.semester
+
+      Source |       SS           df       MS      Number of obs   =     1,094
+-------------+----------------------------------   F(2, 1091)      =      7.33
+       Model |  49.0677332         2  24.5338666   Prob > F        =    0.0007
+    Residual |  3650.48985     1,091  3.34600353   R-squared       =    0.0133
+-------------+----------------------------------   Adj R-squared   =    0.0115
+       Total |  3699.55759     1,093  3.38477364   Root MSE        =    1.8292
+
+------------------------------------------------------------------------------
+          UT |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      remind |   .8802498   .3049691     2.89   0.004     .2818574    1.478642
+  2.semester |  -.3475152   .1134584    -3.06   0.002    -.5701365   -.1248938
+       _cons |   3.108291   .0752436    41.31   0.000     2.960653     3.25593
+------------------------------------------------------------------------------
+
+. areg UT remind i.semester, absorb(id) cluster(id)
+
+Linear regression, absorbing indicators         Number of obs     =      1,093
+                                                F(   2,    660)   =       7.58
+                                                Prob > F          =     0.0006
+                                                R-squared         =     0.8625
+                                                Adj R-squared     =     0.6509
+                                                Root MSE          =     1.0862
+
+                                   (Std. Err. adjusted for 661 clusters in id)
+------------------------------------------------------------------------------
+             |               Robust
+          UT |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      remind |   .3830405   .4297961     0.89   0.373     -.460892    1.226973
+  2.semester |  -.4739496   .1219368    -3.89   0.000    -.7133803   -.2345188
+       _cons |   3.187061   .0538129    59.22   0.000     3.081396    3.292726
+-------------+----------------------------------------------------------------
+          id |   absorbed                                     (661 categories)
+
+. areg UT remind i.semester, absorb(sl_code)
+
+Linear regression, absorbing indicators         Number of obs     =      1,094
+                                                F(   2,   1062)   =       3.04
+                                                Prob > F          =     0.0484
+                                                R-squared         =     0.0528
+                                                Adj R-squared     =     0.0252
+                                                Root MSE          =     1.8165
+
+------------------------------------------------------------------------------
+          UT |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      remind |   .2125014    .499348     0.43   0.671    -.7673194    1.192322
+  2.semester |  -.2987485   .1215285    -2.46   0.014    -.5372117   -.0602852
+       _cons |   3.109674   .0772716    40.24   0.000     2.958051    3.261296
+-------------+----------------------------------------------------------------
+     sl_code |       F(29, 1062) =      1.530   0.036          (30 categories)
+
+. areg UT remind i.sl_code i.semester, absorb(id) cluster(id)
+
+Linear regression, absorbing indicators         Number of obs     =      1,093
+                                                F(  31,    660)   =       1.25
+                                                Prob > F          =     0.1697
+                                                R-squared         =     0.8738
+                                                Adj R-squared     =     0.6563
+                                                Root MSE          =     1.0777
+
+                                      (Std. Err. adjusted for 661 clusters in id)
+---------------------------------------------------------------------------------
+                |               Robust
+             UT |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+----------------+----------------------------------------------------------------
+         remind |   .4473638   .3983321     1.12   0.262    -.3347871    1.229515
+                |
+        sl_code |
+Christine Yo..  |   .3993832   1.300187     0.31   0.759    -2.153618    2.952385
+  Clarisse Siu  |   .1498021   .9808534     0.15   0.879    -1.776167    2.075771
+Claudia Craw..  |   .9784561   1.233879     0.79   0.428    -1.444345    3.401257
+      Dan West  |  -2.212591   1.540991    -1.44   0.152    -5.238428    .8132453
+ David Johnson  |   1.339112   1.081688     1.24   0.216    -.7848535    3.463077
+   Debbie Chen  |    .961178   1.157939     0.83   0.407    -1.312511    3.234867
+  Elaine Chung  |   .2092932   1.085744     0.19   0.847    -1.922635    2.341221
+    Iris Braun  |   .6084688   1.022471     0.60   0.552     -1.39922    2.616157
+      Jay Weng  |   .8708067   1.129622     0.77   0.441     -1.34728    3.088893
+   Jon Garrity  |   1.078381   1.557519     0.69   0.489    -1.979908    4.136671
+  Kat McGeough  |   1.382885    .973038     1.42   0.156    -.5277385    3.293508
+     Kevin Tan  |    1.02185    .966676     1.06   0.291     -.876281    2.919981
+   Matt Cooper  |   1.465897   1.322598     1.11   0.268    -1.131109    4.062903
+    Matt Wyble  |   1.537898   .9472211     1.62   0.105     -.322032    3.397828
+       Meng Lu  |  -.3137543   1.008452    -0.31   0.756    -2.293916    1.666407
+  Mia Mitchell  |   .9961787   1.016158     0.98   0.327    -.9991144    2.991472
+   Micah Stein  |   1.430977   1.323335     1.08   0.280    -1.167478    4.029431
+Nicole Gilmore  |   .4628627   .7635132     0.61   0.545    -1.036345     1.96207
+      Paul Lee  |   1.872999   1.221914     1.53   0.126    -.5263083    4.272306
+ Pilar Tavella  |   .8643599   .9618421     0.90   0.369    -1.024279    2.752999
+  Rachel Henry  |   .6303875   1.114411     0.57   0.572     -1.55783    2.818605
+Rachel Werkema  |   1.462887   .9014745     1.62   0.105    -.3072164    3.232991
+ Stephanie Siu  |  -.1944196   1.101397    -0.18   0.860    -2.357084    1.968245
+   Steve White  |   .7296165   .9344172     0.78   0.435    -1.105172    2.564405
+Surabhi Shan..  |   .8132994   1.093734     0.74   0.457    -1.334318    2.960917
+    Terry Wang  |   .8338741   .8410631     0.99   0.322    -.8176077    2.485356
+     Tom Watts  |   .6671132   .8382683     0.80   0.426     -.978881    2.313107
+       Yue Yin  |   .2933257   1.152936     0.25   0.799    -1.970539    2.557191
+   Zhikai Wang  |   .7678567   .7989618     0.96   0.337    -.8009565     2.33667
+                |
+     2.semester |  -.4211123   .1371872    -3.07   0.002    -.6904882   -.1517363
+          _cons |   2.501251   .6424614     3.89   0.000     1.239736    3.762766
+----------------+----------------------------------------------------------------
+             id |   absorbed                                     (661 categories)
+
+. areg UT remind xile_final i.sl_code i.semester, absorb(id) cluster(id)
+
+Linear regression, absorbing indicators         Number of obs     =      1,084
+                                                F(  32,    658)   =       1.36
+                                                Prob > F          =     0.0914
+                                                R-squared         =     0.8790
+                                                Adj R-squared     =     0.6667
+                                                Root MSE          =     1.0609
+
+                                      (Std. Err. adjusted for 659 clusters in id)
+---------------------------------------------------------------------------------
+                |               Robust
+             UT |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+----------------+----------------------------------------------------------------
+         remind |   .3589207   .3949733     0.91   0.364    -.4166393    1.134481
+     xile_final |   .9500101   .5794833     1.64   0.102    -.1878493     2.08787
+                |
+        sl_code |
+Christine Yo..  |   .4705002   1.178572     0.40   0.690    -1.843715    2.784715
+  Clarisse Siu  |   .2754356   1.060268     0.26   0.795    -1.806481    2.357352
+Claudia Craw..  |    1.26133   1.231603     1.02   0.306    -1.157015    3.679675
+      Dan West  |  -2.085929   1.565614    -1.33   0.183    -5.160131     .988274
+ David Johnson  |   1.342409   1.213813     1.11   0.269    -1.041004    3.725823
+   Debbie Chen  |   .9746949   1.181212     0.83   0.410    -1.344705    3.294095
+  Elaine Chung  |   .2411893   1.151104     0.21   0.834    -2.019091    2.501469
+    Iris Braun  |   .7021758   1.094632     0.64   0.521    -1.447218    2.851569
+      Jay Weng  |   .6563512   1.125129     0.58   0.560    -1.552924    2.865626
+   Jon Garrity  |    .954209    1.60997     0.59   0.554    -2.207089    4.115507
+  Kat McGeough  |   1.370215   1.020979     1.34   0.180     -.634555    3.374984
+     Kevin Tan  |   1.085306   1.021984     1.06   0.289    -.9214372    3.092049
+   Matt Cooper  |   1.427425   1.326818     1.08   0.282    -1.177882    4.032732
+    Matt Wyble  |   1.417532   .9895662     1.43   0.152    -.5255558    3.360621
+       Meng Lu  |  -.3173357   1.446927    -0.22   0.826    -3.158487    2.523816
+  Mia Mitchell  |   .8989592   1.092384     0.82   0.411     -1.24602    3.043938
+   Micah Stein  |   1.327705   1.327701     1.00   0.318    -1.279337    3.934748
+Nicole Gilmore  |   .4959232    .826651     0.60   0.549    -1.127269    2.119115
+      Paul Lee  |   1.825219   1.293591     1.41   0.159    -.7148456    4.365283
+ Pilar Tavella  |   .9076723   .9883225     0.92   0.359    -1.032974    2.848318
+  Rachel Henry  |   .4572252   1.253254     0.36   0.715    -2.003634    2.918084
+Rachel Werkema  |   1.483724   .9503813     1.56   0.119    -.3824213     3.34987
+ Stephanie Siu  |   -.221115   1.118641    -0.20   0.843    -2.417651    1.975421
+   Steve White  |   .5772966   .9360391     0.62   0.538    -1.260687     2.41528
+Surabhi Shan..  |   1.000511   1.160236     0.86   0.389      -1.2777    3.278723
+    Terry Wang  |   .8155334    .957176     0.85   0.395    -1.063954    2.695021
+     Tom Watts  |   .5555565   .8300715     0.67   0.504    -1.074352    2.185465
+       Yue Yin  |   .3735612   1.117121     0.33   0.738    -1.819991    2.567114
+   Zhikai Wang  |   .8809313   .9123456     0.97   0.335    -.9105284    2.672391
+                |
+     2.semester |  -.4073701   .1382638    -2.95   0.003    -.6788614   -.1358787
+          _cons |   2.029566    .787439     2.58   0.010     .4833698    3.575762
+----------------+----------------------------------------------------------------
+             id |   absorbed                                     (659 categories)
+
+. 
+. areg UT remind i.sl_code i.semester, absorb(id) cluster(id)
+
+Linear regression, absorbing indicators         Number of obs     =      1,093
+                                                F(  31,    660)   =       1.25
+                                                Prob > F          =     0.1697
+                                                R-squared         =     0.8738
+                                                Adj R-squared     =     0.6563
+                                                Root MSE          =     1.0777
+
+                                      (Std. Err. adjusted for 661 clusters in id)
+---------------------------------------------------------------------------------
+                |               Robust
+             UT |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+----------------+----------------------------------------------------------------
+         remind |   .4473638   .3983321     1.12   0.262    -.3347871    1.229515
+                |
+        sl_code |
+Christine Yo..  |   .3993832   1.300187     0.31   0.759    -2.153618    2.952385
+  Clarisse Siu  |   .1498021   .9808534     0.15   0.879    -1.776167    2.075771
+Claudia Craw..  |   .9784561   1.233879     0.79   0.428    -1.444345    3.401257
+      Dan West  |  -2.212591   1.540991    -1.44   0.152    -5.238428    .8132453
+ David Johnson  |   1.339112   1.081688     1.24   0.216    -.7848535    3.463077
+   Debbie Chen  |    .961178   1.157939     0.83   0.407    -1.312511    3.234867
+  Elaine Chung  |   .2092932   1.085744     0.19   0.847    -1.922635    2.341221
+    Iris Braun  |   .6084688   1.022471     0.60   0.552     -1.39922    2.616157
+      Jay Weng  |   .8708067   1.129622     0.77   0.441     -1.34728    3.088893
+   Jon Garrity  |   1.078381   1.557519     0.69   0.489    -1.979908    4.136671
+  Kat McGeough  |   1.382885    .973038     1.42   0.156    -.5277385    3.293508
+     Kevin Tan  |    1.02185    .966676     1.06   0.291     -.876281    2.919981
+   Matt Cooper  |   1.465897   1.322598     1.11   0.268    -1.131109    4.062903
+    Matt Wyble  |   1.537898   .9472211     1.62   0.105     -.322032    3.397828
+       Meng Lu  |  -.3137543   1.008452    -0.31   0.756    -2.293916    1.666407
+  Mia Mitchell  |   .9961787   1.016158     0.98   0.327    -.9991144    2.991472
+   Micah Stein  |   1.430977   1.323335     1.08   0.280    -1.167478    4.029431
+Nicole Gilmore  |   .4628627   .7635132     0.61   0.545    -1.036345     1.96207
+      Paul Lee  |   1.872999   1.221914     1.53   0.126    -.5263083    4.272306
+ Pilar Tavella  |   .8643599   .9618421     0.90   0.369    -1.024279    2.752999
+  Rachel Henry  |   .6303875   1.114411     0.57   0.572     -1.55783    2.818605
+Rachel Werkema  |   1.462887   .9014745     1.62   0.105    -.3072164    3.232991
+ Stephanie Siu  |  -.1944196   1.101397    -0.18   0.860    -2.357084    1.968245
+   Steve White  |   .7296165   .9344172     0.78   0.435    -1.105172    2.564405
+Surabhi Shan..  |   .8132994   1.093734     0.74   0.457    -1.334318    2.960917
+    Terry Wang  |   .8338741   .8410631     0.99   0.322    -.8176077    2.485356
+     Tom Watts  |   .6671132   .8382683     0.80   0.426     -.978881    2.313107
+       Yue Yin  |   .2933257   1.152936     0.25   0.799    -1.970539    2.557191
+   Zhikai Wang  |   .7678567   .7989618     0.96   0.337    -.8009565     2.33667
+                |
+     2.semester |  -.4211123   .1371872    -3.07   0.002    -.6904882   -.1517363
+          _cons |   2.501251   .6424614     3.89   0.000     1.239736    3.762766
+----------------+----------------------------------------------------------------
+             id |   absorbed                                     (661 categories)
+
+. predict ut_twiddle, resid
+(4 missing values generated)
+
+. areg remind i.sl_code i.semester, absorb(id) cluster(id)
+
+Linear regression, absorbing indicators         Number of obs     =      1,096
+                                                F(  30,    661)   =      83.36
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.8350
+                                                Adj R-squared     =     0.5527
+                                                Root MSE          =     0.1240
+
+                                      (Std. Err. adjusted for 662 clusters in id)
+---------------------------------------------------------------------------------
+                |               Robust
+         remind |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+----------------+----------------------------------------------------------------
+        sl_code |
+Christine Yo..  |   .1896697   .2764596     0.69   0.493    -.3531751    .7325145
+  Clarisse Siu  |  -.0361586   .0501352    -0.72   0.471    -.1346021    .0622849
+Claudia Craw..  |   .0376912   .0625458     0.60   0.547    -.0851212    .1605035
+      Dan West  |  -.0138893   .0431371    -0.32   0.748    -.0985915    .0708129
+ David Johnson  |    -.02235   .0514606    -0.43   0.664    -.1233959    .0786959
+   Debbie Chen  |  -.0185671   .0419305    -0.44   0.658    -.1009002     .063766
+  Elaine Chung  |   .0309128   .0588411     0.53   0.600    -.0846251    .1464507
+    Iris Braun  |   .0255159   .0394879     0.65   0.518    -.0520209    .1030527
+      Jay Weng  |  -.1303797   .1213171    -1.07   0.283     -.368593    .1078335
+   Jon Garrity  |  -.0324721   .0478987    -0.68   0.498     -.126524    .0615798
+  Kat McGeough  |   .0305347   .0548338     0.56   0.578    -.0771348    .1382041
+     Kevin Tan  |  -.0005163   .0436106    -0.01   0.991    -.0861483    .0851157
+   Matt Cooper  |  -.0289123   .0539665    -0.54   0.592    -.1348786    .0770541
+    Matt Wyble  |   .0597439   .0566514     1.05   0.292    -.0514945    .1709823
+       Meng Lu  |  -.0013677   .0387009    -0.04   0.972    -.0773592    .0746238
+  Mia Mitchell  |    .112083   .1736606     0.65   0.519    -.2289098    .4530759
+   Micah Stein  |   .0123914   .0422038     0.29   0.769    -.0704782    .0952611
+Nicole Gilmore  |   .0225147   .0449191     0.50   0.616    -.0656866     .110716
+      Paul Lee  |  -.0038273   .0446393    -0.09   0.932    -.0914791    .0838246
+ Pilar Tavella  |   .0053076   .0423951     0.13   0.900    -.0779377     .088553
+  Rachel Henry  |  -.0152765   .0427894    -0.36   0.721     -.099296    .0687429
+Rachel Werkema  |  -.0282878   .0528298    -0.54   0.593    -.1320223    .0754467
+ Stephanie Siu  |  -.0228133   .0411119    -0.55   0.579    -.1035389    .0579124
+   Steve White  |   .8040212   .1366551     5.88   0.000     .5356909    1.072351
+Surabhi Shan..  |   -.033133   .1059725    -0.31   0.755    -.2412163    .1749503
+    Terry Wang  |  -.0280495    .044568    -0.63   0.529    -.1155613    .0594624
+     Tom Watts  |   .0274285   .0516084     0.53   0.595    -.0739077    .1287646
+       Yue Yin  |   .0109803    .079657     0.14   0.890     -.145431    .1673916
+   Zhikai Wang  |   .0988914   .0946691     1.04   0.297    -.0869971    .2847798
+                |
+     2.semester |   .0425515   .0173002     2.46   0.014     .0085816    .0765214
+          _cons |  -.0351381   .0373842    -0.94   0.348    -.1085443     .038268
+----------------+----------------------------------------------------------------
+             id |   absorbed                                     (662 categories)
+
+. predict remind_twiddle, resid
+(1 missing value generated)
+
+. 
+. outsheet ut_twiddle remind_twiddle UT remind sl_code semester id using "data/tem
+> p/twiddle.csv", comma replace
+
+. 
+. * most of the results show a robust increase in UT, despite lots of controls
+. * its hard to do power analysis because its hard to estimate all the variances
+. 
+. * focus on comparing the change for Steve's semester 1 students vs control
+. keep UT leader sec id semester
+
+. duplicates drop id semester, force
+
+Duplicates in terms of id semester
+
+(5 observations deleted)
+
+. reshape wide UT leader sec, i(id) j(semester)
+(note: j = 1 2)
+
+Data                               long   ->   wide
+-----------------------------------------------------------------------------
+Number of obs.                     1092   ->     663
+Number of variables                   5   ->       7
+j variable (2 values)          semester   ->   (dropped)
+xij variables:
+                                     UT   ->   UT1 UT2
+                                 leader   ->   leader1 leader2
+                                    sec   ->   sec1 sec2
+-----------------------------------------------------------------------------
+
+. gen remind = (sec2 == "27" | sec2 == "28")
+
+. reg UT2 UT1 remind, r
+
+Linear regression                               Number of obs     =        428
+                                                F(2, 425)         =     206.37
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.4387
+                                                Root MSE          =     1.4602
+
+------------------------------------------------------------------------------
+             |               Robust
+         UT2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         UT1 |    .751104   .0387539    19.38   0.000     .6749308    .8272773
+      remind |   .5155633   .2585034     1.99   0.047      .007459    1.023668
+       _cons |   .3363154   .1493185     2.25   0.025     .0428207      .62981
+------------------------------------------------------------------------------
+
+. * this is the most robust evidence that remind.com reminders matter
+. * t = 1.99 and effect is 0.5 more tests passed
+. 
+end of do-file
